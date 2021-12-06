@@ -1,18 +1,22 @@
 const express = require("express");
 const router = express.Router();
-const contactsOperations = require("../../model");
 const { NotFound } = require("http-errors");
+const { Contact } = require("../../models");
 const Joi = require("joi");
 
-const contactSchema = Joi.object({
+const joiSchema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().required(),
   phone: Joi.string().required(),
+  favorite: Joi.boolean(),
+});
+const favoriteJoiSchema = Joi.object({
+  favorite: Joi.boolean().required(),
 });
 
 router.get("/", async (req, res, next) => {
   try {
-    const contacts = await contactsOperations.listContacts();
+    const contacts = await Contact.find({});
     res.json({
       status: "success",
       code: 200,
@@ -28,7 +32,7 @@ router.get("/", async (req, res, next) => {
 router.get("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
-    const contactId = await contactsOperations.getContactById(id);
+    const contactId = await Contact.findById(id);
     if (!contactId) {
       throw new NotFound(`Contact wit id=${id} not found`);
     }
@@ -46,12 +50,12 @@ router.get("/:id", async (req, res, next) => {
 
 router.post("/", async (req, res, next) => {
   try {
-    const { error } = contactSchema.validate(req.body);
+    const { error } = joiSchema.validate(req.body);
     if (error) {
       error.status = 400;
       throw error;
     }
-    const result = await contactsOperations.addContact(req.body);
+    const result = await Contact.create(req.body);
     res.status(201).json({
       status: "success",
       code: 201,
@@ -65,7 +69,7 @@ router.post("/", async (req, res, next) => {
 router.delete("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
-    const result = await contactsOperations.removeContact(id);
+    const result = await Contact.findByIdAndRemove(id);
     if (!result) {
       throw new NotFound(`Contact wit id=${id} not found`);
     }
@@ -82,13 +86,42 @@ router.delete("/:id", async (req, res, next) => {
 
 router.put("/:id", async (req, res, next) => {
   try {
-    const { error } = contactSchema.validate(req.body);
+    const { error } = joiSchema.validate(req.body);
     if (error) {
       error.status = 400;
       throw error;
     }
     const { id } = req.params;
-    const result = await contactsOperations.updateContact(id, req.body);
+    const result = await Contact.findByIdAndUpdate(id, req.body);
+    if (!result) {
+      throw new NotFound(`Contact wit id=${id} not found`);
+    }
+    res.json({
+      status: "success",
+      code: 200,
+      data: {
+        result,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.patch("/:id/favorite", async (req, res, next) => {
+  try {
+    const { error } = favoriteJoiSchema.validate(req.body);
+    if (error) {
+      error.status = 400;
+      throw error;
+    }
+    const { id } = req.params;
+    const { favorite } = req.body;
+    const result = await Contact.findByIdAndUpdate(
+      id,
+      { favorite },
+      { new: true }
+    );
     if (!result) {
       throw new NotFound(`Contact wit id=${id} not found`);
     }
