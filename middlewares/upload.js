@@ -11,6 +11,15 @@ const multerConfig = multer.diskStorage({
     cb(null, file.originalname);
   },
   limits: { fileSize: 2048 },
+  fileFilter: (req, file, cb) => {
+    const fileTypes = /jpeg|jpg|png|gif/;
+    const mimetype = fileTypes.test(file.mimetype);
+    const extname = fileTypes.test(path.extname(file.originalname));
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb("Не валидный формат файла");
+  },
 });
 
 const upload = multer({
