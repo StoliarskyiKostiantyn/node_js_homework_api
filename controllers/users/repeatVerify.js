@@ -24,9 +24,10 @@ const repeatVerify = async (req, res) => {
     subject: "Подтверждение Email",
     html: `<a target="_blank" href="http://localhost:3000/api/users/verify/${verificationToken}">Подтвердить Email</a>`,
   };
+  await sendEmail(mail);
   await User.findByIdAndUpdate(user._id, {
     verify: true,
-    verificationToken: null,
+    verificationToken: verificationToken,
   });
   res.json({
     message: "Verify success",
