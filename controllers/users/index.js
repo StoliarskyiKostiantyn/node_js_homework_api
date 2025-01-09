@@ -1,10 +1,10 @@
-const signup = require("./signup");
-const login = require("./login");
-const getCurrent = require("./getCurrent");
-const logout = require("./logout");
-const updateAvatar = require("./updateAvatar");
-const verifyEmail = require("./verifyEmail");
-const repeatVerify = require("./repeatVerify");
+const signup = require('./signup')
+const login = require('./login')
+const getCurrent = require('./getCurrent')
+const logout = require('./logout')
+const updateAvatar = require('./updateAvatar')
+const verifyEmail = require('./verifyEmail')
+const repeatVerify = require('./repeatVerify')
 module.exports = {
   signup,
   login,
@@ -13,4 +13,4 @@ module.exports = {
   updateAvatar,
   verifyEmail,
   repeatVerify,
-};
+}
